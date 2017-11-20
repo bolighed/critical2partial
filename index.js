@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = (CONFIG) => {
     const generateCritical = function(url, file_path) {
-        const body = fs.readFileSync(path.join(__dirname, CONFIG.static_folder, url), 'utf8');
+        const body = fs.readFileSync(path.join(__dirname, url), 'utf8');
     
         critical.generate({
             base: path.join(__dirname, CONFIG.critical_path),
