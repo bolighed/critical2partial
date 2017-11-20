@@ -1,0 +1,15 @@
+{
+  "name": "critical2partial",
+  "version": "1.0.0",
+  "description": "Tool for create critical html partials",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "critical": "^0.9.1"
+  }
+}
