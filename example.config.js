@@ -1,10 +1,8 @@
 module.exports = config = {
     critical_path: '../../backend',
     critical_assets_folder: 'assets',
-    static_folder: '../../backend/home/templates-static/',
-    output_folder: '../../backend/home/templates/',
     files: [{
-        static_file: 'home/home.html',
-        output_file: 'home/critical.home.html'
+        static_file: '../../backend/home/templates-static/home/home.html',
+        output_file: '../../backend/home/templates/home/critical.home.html'
     }]
 }
