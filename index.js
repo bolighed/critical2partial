@@ -6,14 +6,7 @@ module.exports = (CONFIG) => {
     const generateCritical = function(url, file_path) {
         const body = fs.readFileSync(path.join(__dirname, url), 'utf8');
     
-        critical.generate({
-            base: path.join(__dirname, CONFIG.critical_path),
-            folder: CONFIG.critical_assets_folder,
-            html: body,
-            width: 1300,
-            height: 900,
-            minify: true
-        }).then(function (output) {
+        critical.generate(CONFIG.critical_options).then(function (output) {
             output = '<style>'+output+'</style>';
             const output_file_path = path.join(__dirname, file_path);
             fs.writeFile(output_file_path, output, (err) => {

@@ -5,7 +5,7 @@ Tool for create critical html partials
 ## Install
 
 ```sh
-npm i critical2partial -D
+npm i bolighed-critical2partial -D
 ```
 
 ## Example
@@ -13,17 +13,27 @@ npm i critical2partial -D
 `critical.config.js`
 ```js
 module.exports = config = {
-    critical_path: '../../../backend',
-    critical_assets_folder: 'assets',
+    critical_options: {
+        base: path.join(__dirname, '../../../backend'),
+        folder: 'assets',
+        html: body,
+        ignore: [
+            "@font-face"
+        ],
+        width: 1300,
+        height: 900,
+        minify: true
+    },
     files: [{
         static_file: '../../../backend/home/templates-static/home/home.html',
         output_file: '../../../backend/home/templates/home/critical.home.html'
     }]
 }
 ```
+critical_options are the options of the `critical` npm module. 
 
 `index.js`
 ```js
 const config = require('./critical.config');
-const c2p = require('critical2partial')(config);
+const c2p = require('bolighed-critical2partial')(config);
 ```
