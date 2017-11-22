@@ -12,11 +12,12 @@ npm i bolighed-critical2partial -D
 
 `critical.config.js`
 ```js
+const path = require('path');
+
 module.exports = config = {
     critical_options: {
         base: path.join(__dirname, '../../../backend'),
         folder: 'assets',
-        html: body,
         ignore: [
             "@font-face"
         ],

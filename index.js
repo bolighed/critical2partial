@@ -6,7 +6,7 @@ module.exports = (CONFIG) => {
     const generateCritical = function(url, file_path) {
         const body = fs.readFileSync(path.join(__dirname, url), 'utf8');
         
-        Object.assign(CONFIG.critical_options, {body: body});
+        Object.assign(CONFIG.critical_options, {html: body});
     
         critical.generate(CONFIG.critical_options).then(function (output) {
             output = '<style>'+output+'</style>';
