@@ -1,6 +1,6 @@
 {
   "name": "bolighed-critical2partial",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Tool for create critical html partials",
   "main": "index.js",
   "scripts": {
