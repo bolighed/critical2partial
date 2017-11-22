@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "critical": "^1.0.0"
+    "critical": "^1.0.0",
+    "node-fetch": "^1.7.3"
   }
 }
