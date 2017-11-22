@@ -7,21 +7,23 @@ module.exports = (CONFIG) => {
     const generateCritical = function(url, file_path) {
 
         if (url.startsWith("http")) {
+            console.log("fetching: ", url)
             fetch(url).then((data) => {
                 return data.text()
             }).then((body) => {
                 Object.assign(CONFIG.critical_options, {html: body});
-                generateCritical(CONFIG)
+                generateCriticalFile(CONFIG, file_path)
             })
         } else {
+            console.log("reading:", path.join(__dirname, url));
             const body = fs.readFileSync(path.join(__dirname, url), 'utf8');
             Object.assign(CONFIG.critical_options, {html: body});
-            generateCritical(CONFIG)
+            generateCriticalFile(CONFIG, file_path)
         }
 
     }
 
-    const genereteCritical = function(CONFIG) {
+    const generateCriticalFile = function(CONFIG, file_path) {
         critical.generate(CONFIG.critical_options).then(function (output) {
             output = '<style>'+output+'</style>';
             const output_file_path = path.join(__dirname, file_path);
