@@ -1,8 +1,9 @@
+const path = require('path');
+
 module.exports = config = {
     critical_options: {
         base: path.join(__dirname, '../../../backend'),
         folder: 'assets',
-        html: body,
         ignore: [
             "@font-face"
         ],

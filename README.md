@@ -33,6 +33,14 @@ module.exports = config = {
 ```
 critical_options are the options of the `critical` npm module. `static_file` could also be a url, if so it will the file will be fetched from remote.
 
+## Use from CLI
+
+```sh
+bolighed-critical2partial -c ./example.config.js 
+```
+
+## Use programmatically 
+
 `index.js`
 ```js
 const config = require('./critical.config');
