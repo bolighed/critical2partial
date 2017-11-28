@@ -24,7 +24,8 @@ module.exports = (CONFIG) => {
     }
 
     const generateCriticalFile = function(CONFIG, file_path) {
-        critical.generate(CONFIG.critical_options).then(function (output) {
+        critical.generate(CONFIG.critical_options)
+        .then(function (output) {
             output = '<style>'+output+'</style>';
             const output_file_path = path.join(__dirname, file_path);
             fs.writeFile(output_file_path, output, (err) => {
@@ -32,7 +33,7 @@ module.exports = (CONFIG) => {
                 console.log(`${output_file_path} generated!`);
             });
         }).error(function (err) {
-            console.log('err',err.message || err);
+            if (err) throw err;
         });
     }
     
