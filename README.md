@@ -15,18 +15,18 @@ npm i bolighed-critical2partial -D
 const path = require('path');
 
 module.exports = config = {
-    critical_options: {
-        base: path.join(__dirname, '../../../backend'),
-        folder: 'assets',
-        ignore: [
-            "@font-face"
-        ],
-        width: 1300,
-        height: 900,
-        minify: true
-    },
     files: [{
-        static_file: '../../../backend/home/templates-static/home/home.html',
+        critical_options: {
+            base: path.join(__dirname, '../../../backend'),
+            folder: 'assets',
+            ignore: [
+                "@font-face"
+            ],
+            width: 1300,
+            height: 900,
+            minify: true
+        },
+        static_file: 'http://localhost:18000/bolig/aarhus-c/8000/thorvaldsensgade/1/1/th/sundhed',
         output_file: '../../../backend/home/templates/home/critical.home.html'
     }]
 }
