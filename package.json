@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "critical": "^1.0.0",
-    "node-fetch": "^1.7.3",
+    "puppeteer": "^0.13.0",
     "yargs": "^10.0.3"
   }
 }

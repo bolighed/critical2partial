@@ -1,19 +1,43 @@
 const critical = require('critical');
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch');
+const puppeteer = require('puppeteer');
 
 module.exports = (CONFIG) => {
-    const generateCritical = function(critical_options, url, file_path) {
+    const generateCritical = async function(critical_options, url, file_path) {
 
         if (url.startsWith("http")) {
             console.log("fetching url: ", url)
-            fetch(url).then((data) => {
-                return data.text()
-            }).then((body) => {
+
+            const browser = await puppeteer.launch({
+                headless: true,
+            });
+
+            // Create a new page
+            const page = await browser.newPage();
+        
+            // Set some dimensions to the screen
+            page.setViewport({
+                width: critical_options.width,
+                height: critical_options.height
+            });
+        
+            // Navigate to Our Code World
+            await page.goto(url, {waitUntil: 'networkidle2'});
+        
+            // Create a screenshot of Our Code World website
+            // await page.waitForSelector("")
+    
+            await page.evaluate(() => {
+                return document.documentElement.innerHTML;
+            })
+            .then((body) => {
                 Object.assign(critical_options, {html: body});
                 generateCriticalFile(critical_options, file_path)
-            })
+            });
+
+            browser.close();
+
         } else {
             console.log("reading file:", path.resolve(url));
             const body = fs.readFileSync(path.resolve(url), 'utf8');
