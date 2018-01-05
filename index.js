@@ -12,7 +12,7 @@ module.exports = (CONFIG) => {
                 return data.text()
             }).then((body) => {
                 Object.assign(critical_options, {html: body});
-                generateCriticalFile(CONFIG, file_path)
+                generateCriticalFile(critical_options, file_path)
             })
         } else {
             console.log("reading file:", path.resolve(url));
