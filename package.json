@@ -16,8 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "critical": "^1.0.0",
-    "puppeteer": "^0.13.0",
-    "yargs": "^10.0.3"
+    "critical": "^1.1.0",
+    "puppeteer": "^1.0.0",
+    "yargs": "^10.1.1"
   }
 }

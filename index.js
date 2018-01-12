@@ -1,67 +1,102 @@
 const critical = require('critical');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 const puppeteer = require('puppeteer');
 
-module.exports = (CONFIG) => {
-    const generateCritical = async function(critical_options, url, file_path) {
+process.setMaxListeners(Infinity); // <== Important line
 
-        if (url.startsWith("http")) {
-            console.log("fetching url: ", url)
+const writeFile = util.promisify(fs.writeFile);
 
-            const browser = await puppeteer.launch({
-                headless: true,
-            });
+let browser;
 
-            // Create a new page
-            const page = await browser.newPage();
-        
-            // Set some dimensions to the screen
-            page.setViewport({
-                width: critical_options.width,
-                height: critical_options.height
-            });
-        
-            // Navigate to Our Code World
-            await page.goto(url, {waitUntil: 'networkidle2'});
-        
-            // Create a screenshot of Our Code World website
-            // await page.waitForSelector("")
-    
-            await page.evaluate(() => {
-                return document.documentElement.innerHTML;
-            })
-            .then((body) => {
-                Object.assign(critical_options, {html: body});
-                generateCriticalFile(critical_options, file_path)
-            });
+const args = [
+    // '--disable-gpu',
+    // `--window-size=${ resolution.x },${ resolution.y }`,
+    // '--no-sandbox',
+];
 
-            browser.close();
+const work = async (file) => {
+    // console.log("file", file)
+    const page = await browser.newPage();
 
-        } else {
-            console.log("reading file:", path.resolve(url));
-            const body = fs.readFileSync(path.resolve(url), 'utf8');
-            Object.assign(critical_options, {html: body});
-            generateCriticalFile(critical_options, file_path)
-        }
+    await page.setViewport({
+        width: file.critical_options.width,
+        height: file.critical_options.height
+    })
 
+    try {
+        await page.goto(file.static_file, { waitUntil: 'networkidle2' });
+    } catch (error) {
+        page.close();
+        throw error;
     }
 
-    const generateCriticalFile = function(critical_options, file_path) {
-        critical.generate(critical_options)
-        .then(function (output) {
-            output = '<style>'+output+'</style>';
-            const output_file_path = path.resolve(file_path);
-            fs.writeFile(output_file_path, output, (err) => {
-                if (err) throw err;
-                console.log(`${output_file_path} generated!`);
-            });
-        }).error(function (err) {
-            if (err) throw err;
-        });
-    }
-    
-    CONFIG.files.forEach((page) => {
-        generateCritical(page.critical_options ,page.static_file, page.output_file);
+    const body = await page.evaluate(() => {
+        return document.documentElement.innerHTML;
     });
+
+    const output_file_path = path.resolve(file.output_file);
+
+    let output;
+
+    try {
+        output = await critical.generate(Object.assign(file.critical_options, { html: body }))
+        output = '<style>' + output + '</style>';
+    } catch (error) {
+        page.close();
+        throw error
+    }
+
+    try {
+        await writeFile(output_file_path, output);
+        console.log(`${output_file_path} generated!`);
+    } catch (error) {
+        page.close();
+        throw error;
+    }
+
+    await page.close();
+}
+
+
+Object.defineProperty(Array.prototype, 'chunk', {
+    value: function(chunkSize) {
+        var R = [];
+        for (var i=0; i<this.length; i+=chunkSize)
+            R.push(this.slice(i,i+chunkSize));
+        return R;
+    }
+});
+
+module.exports = (CONFIG) => {
+
+    async function run(files) {
+        const promised = CONFIG.files.map((file) => work(file))
+        await Promise.all(promised)
+    }
+
+    const generateCritical = async (CONFIG) => {
+        browser = await puppeteer.launch({
+          headless     : true,
+          handleSIGINT : false,
+          args: args
+        })
+
+        const chunks = CONFIG.files.chunk(2)
+
+        async function run(chunks) {
+            for(const chunk of chunks) {
+                const promised = chunk.map((file) => work(file))
+                await Promise.all(promised)
+            }
+        };
+        await run(chunks);
+
+        await browser.close();
+
+        console.log('DONE');
+    }
+    
+    generateCritical(CONFIG)
 }
