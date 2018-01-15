@@ -15,6 +15,7 @@ npm i bolighed-critical2partial -D
 const path = require('path');
 
 module.exports = config = {
+    parallel_tabs: 4,
     browser_args: [
         // '--disable-gpu',
         // `--window-size=${ resolution.x },${ resolution.y }`,
