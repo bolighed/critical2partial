@@ -15,6 +15,11 @@ npm i bolighed-critical2partial -D
 const path = require('path');
 
 module.exports = config = {
+    browser_args: [
+        // '--disable-gpu',
+        // `--window-size=${ resolution.x },${ resolution.y }`,
+        '--no-sandbox',
+    ],
     files: [{
         critical_options: {
             base: path.join(__dirname, '../../../backend'),

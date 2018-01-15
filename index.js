@@ -9,16 +9,9 @@ process.setMaxListeners(Infinity); // <== Important line
 const writeFile = util.promisify(fs.writeFile);
 
 let browser;
-
-const args = [
-    // '--disable-gpu',
-    // `--window-size=${ resolution.x },${ resolution.y }`,
-    // '--no-sandbox',
-];
+let page;
 
 const work = async (file) => {
-    // console.log("file", file)
-    const page = await browser.newPage();
 
     await page.setViewport({
         width: file.critical_options.width,
@@ -44,19 +37,19 @@ const work = async (file) => {
         output = await critical.generate(Object.assign(file.critical_options, { html: body }))
         output = '<style>' + output + '</style>';
     } catch (error) {
+        console.log("ERROR: problem generating the criticall CSS");
         page.close();
-        throw error
+        throw error;
     }
 
     try {
         await writeFile(output_file_path, output);
         console.log(`${output_file_path} generated!`);
     } catch (error) {
+        console.log("ERROR: problem writing the file ${output_file_path}");
         page.close();
         throw error;
     }
-
-    await page.close();
 }
 
 
@@ -77,11 +70,9 @@ module.exports = (CONFIG) => {
     }
 
     const generateCritical = async (CONFIG) => {
-        browser = await puppeteer.launch({
-          headless     : true,
-          handleSIGINT : false,
-          args: args
-        })
+        browser = await puppeteer.launch(CONFIG.browser_args)
+
+        page = await browser.newPage();
 
         const chunks = CONFIG.files.chunk(2)
 
@@ -91,11 +82,16 @@ module.exports = (CONFIG) => {
                 await Promise.all(promised)
             }
         };
-        await run(chunks);
+
+        await run(chunks).then(() => {
+            console.log(`DONE! ${CONFIG.files.length} file${CONFIG.files.length > 1 ? 's' : ''} generated`);
+        }).catch((error) => {
+            console.log("run is done: ERROR", error);
+        });
+
+        await page.close();
 
         await browser.close();
-
-        console.log('DONE');
     }
     
     generateCritical(CONFIG)
