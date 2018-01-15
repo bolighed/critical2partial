@@ -11,6 +11,10 @@ const writeFile = util.promisify(fs.writeFile);
 let browser;
 let page;
 
+process.on('uncaughtException', function(err) {
+    console.log('Caught exception: ' + err);
+});
+
 const work = async (file) => {
 
     await page.setViewport({
@@ -70,11 +74,15 @@ module.exports = (CONFIG) => {
     }
 
     const generateCritical = async (CONFIG) => {
-        browser = await puppeteer.launch(CONFIG.browser_args)
+        browser = await puppeteer.launch({
+          headless     : true,
+          handleSIGINT : true,
+          args: CONFIG.args
+        })
 
         page = await browser.newPage();
 
-        const chunks = CONFIG.files.chunk(2)
+        const chunks = CONFIG.files.chunk(CONFIG.parallel_tabs || 2);
 
         async function run(chunks) {
             for(const chunk of chunks) {
@@ -86,7 +94,7 @@ module.exports = (CONFIG) => {
         await run(chunks).then(() => {
             console.log(`DONE! ${CONFIG.files.length} file${CONFIG.files.length > 1 ? 's' : ''} generated`);
         }).catch((error) => {
-            console.log("run is done: ERROR", error);
+            console.log("DONE WITH ERRORS: ", error);
         });
 
         await page.close();
