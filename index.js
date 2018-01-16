@@ -4,6 +4,15 @@ const path = require('path');
 const util = require('util');
 const puppeteer = require('puppeteer');
 
+function ensureDirectoryExistence(filePath) {
+    var dirname = path.dirname(filePath);
+    if (fs.existsSync(dirname)) {
+        return true;
+    }
+    ensureDirectoryExistence(dirname);
+    fs.mkdirSync(dirname);
+}
+
 process.setMaxListeners(Infinity); // <== Important line
 
 const writeFile = util.promisify(fs.writeFile);
@@ -11,7 +20,7 @@ const writeFile = util.promisify(fs.writeFile);
 let browser;
 let page;
 
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function (err) {
     console.log('Caught exception: ' + err);
 });
 
@@ -47,6 +56,7 @@ const work = async (file) => {
     }
 
     try {
+        ensureDirectoryExistence(output_file_path);
         await writeFile(output_file_path, output);
         console.log(`${output_file_path} generated!`);
     } catch (error) {
@@ -58,10 +68,10 @@ const work = async (file) => {
 
 
 Object.defineProperty(Array.prototype, 'chunk', {
-    value: function(chunkSize) {
+    value: function (chunkSize) {
         var R = [];
-        for (var i=0; i<this.length; i+=chunkSize)
-            R.push(this.slice(i,i+chunkSize));
+        for (var i = 0; i < this.length; i += chunkSize)
+            R.push(this.slice(i, i + chunkSize));
         return R;
     }
 });
@@ -75,9 +85,9 @@ module.exports = (CONFIG) => {
 
     const generateCritical = async (CONFIG) => {
         browser = await puppeteer.launch({
-          headless     : true,
-          handleSIGINT : true,
-          args: CONFIG.browser_args
+            headless: true,
+            handleSIGINT: true,
+            args: CONFIG.browser_args
         })
 
         page = await browser.newPage();
@@ -85,7 +95,7 @@ module.exports = (CONFIG) => {
         const chunks = CONFIG.files.chunk(CONFIG.parallel_tabs || 2);
 
         async function run(chunks) {
-            for(const chunk of chunks) {
+            for (const chunk of chunks) {
                 const promised = chunk.map((file) => work(file))
                 await Promise.all(promised)
             }
@@ -101,6 +111,6 @@ module.exports = (CONFIG) => {
 
         await browser.close();
     }
-    
+
     generateCritical(CONFIG)
 }
