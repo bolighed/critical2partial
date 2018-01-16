@@ -77,7 +77,7 @@ module.exports = (CONFIG) => {
         browser = await puppeteer.launch({
           headless     : true,
           handleSIGINT : true,
-          args: CONFIG.args
+          args: CONFIG.browser_args
         })
 
         page = await browser.newPage();
