@@ -32,7 +32,9 @@ const work = async (file) => {
     })
 
     try {
-        await page.goto(file.static_file, { waitUntil: 'networkidle2' });
+        await page.goto(file.static_file, {
+            waitUntil: 'networkidle2'
+        });
     } catch (error) {
         page.close();
         throw error;
@@ -47,7 +49,9 @@ const work = async (file) => {
     let output;
 
     try {
-        output = await critical.generate(Object.assign(file.critical_options, { html: body }))
+        output = await critical.generate(Object.assign(file.critical_options, {
+            html: body
+        }))
         output = '<style>' + output + '</style>';
     } catch (error) {
         console.log("ERROR: problem generating the criticall CSS");

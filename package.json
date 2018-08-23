@@ -4,10 +4,12 @@
   "description": "Tool for create critical html partials",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/tsc"
   },
   "bin": {
-    "bolighed-critical2partial": "./cli.js"
+    "bolighed-critical2partial": "./cli.js",
+    "bo-critical": "./bin/bo-critical"
   },
   "repository": {
     "url": "https://github.com/bolighed/critical2partial"
@@ -16,8 +18,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/mkdirp": "^0.5.2",
+    "@types/mz": "0.0.32",
+    "@types/puppeteer": "^1.6.0",
+    "@types/yargs": "^11.1.1",
     "critical": "^1.1.0",
+    "mkdirp": "^0.5.1",
+    "mz": "^2.7.0",
     "puppeteer": "^1.1.1",
-    "yargs": "^11.0.0"
+    "yargs": "^11.1.0"
   }
 }
