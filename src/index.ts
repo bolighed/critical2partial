@@ -79,7 +79,7 @@ export async function generate(config: FileConfig[]) {
 
     const browser = await puppeteer.launch({
         headless: true,
-        //handleSIGINT: true,
+        handleSIGINT: true,
         args: void 0
     });
 
