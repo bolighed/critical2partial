@@ -76,7 +76,7 @@ export class ChromiumQueue {
     private async work(config: FileConfig) {
         let page = this.pages.pop()!;
 
-        if (page && page.isClosed()) {
+        if (!page || page.isClosed()) {
             page = await this.browser!.newPage();
         }
 
