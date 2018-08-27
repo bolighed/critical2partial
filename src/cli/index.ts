@@ -4,6 +4,7 @@ import * as fs from 'mz/fs';
 import * as Path from 'path';
 import { Critical, FileConfig } from '../types';
 import * as util from 'util';
+import * as os from 'os';
 
 export async function run() {
     const argv = yargs
@@ -12,6 +13,16 @@ export async function run() {
             describe: 'Configuration file',
             type: 'string',
             required: true
+        })
+        .option('pages', {
+            alias: 'p',
+            type: 'number',
+            default: os.cpus().length
+        })
+        .option('browsers', {
+            alias: 'b',
+            type: 'number',
+            default: 1
         })
         .demandOption(['config'], 'Please provide a Configuration file')
         .help()
@@ -40,12 +51,10 @@ export async function run() {
     }
 
 
-    // for (let i = 0; i < 15; i++) {
-    //     config = config.concat(config);
-    // }
-
-    //console.log(config);
-    const result = await generate(config);
+    const result = await generate(config, {
+        browsers: argv.browsers,
+        concurrency: argv.pages
+    });
 
     let out = result.map(m => {
         if (m.error) m.error = m.error.message as any;
@@ -54,6 +63,5 @@ export async function run() {
 
     await fs.writeFile("critical-log.json", JSON.stringify(out, null, 2));
 
-    //console.log(util.inspect(result, false, 10, true));
 
 }

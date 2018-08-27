@@ -15,7 +15,7 @@ export class Queue<T> {
     private _running = 0;
     private _emitter = new EventEmitter();
     private _results: Result<T>[] = [];
-    constructor(private tasks: T[], private fn: (config: T) => Promise<any>) { }
+    constructor(private tasks: T[], private fn: (config: T) => Promise<any>, public concurrency = Concurrency) { }
 
 
     run() {
@@ -23,7 +23,7 @@ export class Queue<T> {
 
             this._emitter.once('done', res);
 
-            while (this._running <= Concurrency) {
+            while (this._running <= this.concurrency) {
                 if (this.tasks.length == 0) break;
                 this._runTask(this.tasks.pop()!);
             }
@@ -37,7 +37,7 @@ export class Queue<T> {
         const done = (error?: Error) => {
             this._results.push({ config, error, status: error ? 'fail' : 'ok' });
             this._running--;
-            if (this.tasks.length)
+            if (this.tasks.length && this._running < this.concurrency)
                 this._runTask(this.tasks.pop()!);
 
             if (this._running === 0 && this.tasks.length === 0)
@@ -47,7 +47,5 @@ export class Queue<T> {
         return Promise.resolve(this.fn(config))
             .then(() => done(), done);
     }
-
-
 
 }
