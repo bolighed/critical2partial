@@ -17,12 +17,17 @@ export async function run() {
         .option('pages', {
             alias: 'p',
             type: 'number',
+            describe: 'Number of concurrently running tabs (defaults to number of cpus)',
             default: os.cpus().length
         })
         .option('browsers', {
             alias: 'b',
             type: 'number',
+            describe: 'How many browsers to spawn.',
             default: 1
+        })
+        .option('log', {
+            alias: 'l',
         })
         .demandOption(['config'], 'Please provide a Configuration file')
         .help()
