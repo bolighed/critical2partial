@@ -7,6 +7,8 @@ import * as Path from 'path';
 import * as fs from 'mz/fs';
 import Debug from 'debug';
 const debug = Debug('bo-critical:queue');
+import chalk from 'chalk';
+import { delay } from './utils';
 
 function ensurepath(path: string) {
     return new Promise((res, rej) => {
@@ -16,13 +18,6 @@ function ensurepath(path: string) {
     });
 }
 
-function delay(timeout: number = 0) {
-    return new Promise((res) => {
-        setTimeout(() => {
-            res();
-        }, timeout);
-    })
-}
 
 
 
@@ -80,6 +75,7 @@ export class ChromiumQueue {
             page = await this.browser!.newPage();
         }
 
+        debug('set viewport %s', config.url)
         await page.setViewport({
             width: config.critical.width || 800,
             height: config.critical.height || 600
@@ -87,6 +83,7 @@ export class ChromiumQueue {
 
         try {
 
+            debug('goto page %s', config.url)
             await page.goto(config.url, {
                 waitUntil: 'networkidle2'
             });
@@ -95,11 +92,12 @@ export class ChromiumQueue {
             if (config.delay)
                 await delay(config.delay);
 
-
+            debug('fetching html %s', config.url)
             const html = await page.evaluate(() => {
                 return document.documentElement.innerHTML;
             });
 
+            debug('generating critical %s', config.url)
             const out = await Gen.generate(Object.assign({
                 html
             }, config.critical));
@@ -108,13 +106,18 @@ export class ChromiumQueue {
             const dest = Path.resolve(config.dest),
                 dirname = Path.dirname(config.dest);
 
+            debug('writing file %s: %s', config.url, dest);
             await ensurepath(dirname);
             await fs.writeFile(dest, `<style>${out}</style>`);
-            this.logger.log("critical generated: %s => %s", config.url, config.dest);
-
+            this.logger.log("  %s: %s => %s", chalk.green("OK"), config.url, chalk.cyan(config.dest));
+            await delay(200);
         } catch (e) {
+            debug('error %s: %s', config.url, e.message);
             this.pages.push(page);
-            this.logger.log("could not generate critical for: %s", config.url);
+
+            this.logger.log("  %s: %s", chalk.red("FAIL"), chalk.cyan(config.url));
+            this.logger.log("    %s", chalk.grey(e.message));
+            await delay(200);
             throw e;
         }
 

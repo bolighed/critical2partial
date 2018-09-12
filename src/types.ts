@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 import { format } from 'util';
-
+import strip from 'strip-ansi';
 export interface Critical {
     inline?: boolean
     // Your base directory
@@ -41,9 +41,14 @@ export interface FileConfig {
 }
 
 export class Logger {
-    constructor(private out: Writable) { }
+    colors: boolean;
+    constructor(private out: Writable) {
+        this.colors = this.out === process.stdout && !!process.stdout.isTTY
+    }
 
     log(fmt: string, ...args: any[]) {
-        this.out.write(format(fmt, ...args));
+        let str = format(fmt + '\n', ...args);
+        if (!this.colors) str = strip(str);
+        this.out.write(str);
     }
 }

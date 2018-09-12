@@ -40,8 +40,6 @@ export async function run() {
         .help()
         .argv;
 
-
-
     const resolvedPath = Path.resolve(argv.config);
 
     let config: FileConfig[] | undefined;
@@ -84,8 +82,5 @@ export async function run() {
     if (argv.report) {
         await fs.writeFile(argv.report, JSON.stringify(out, null, 2));
     }
-
-
-
 
 }

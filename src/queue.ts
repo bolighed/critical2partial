@@ -1,5 +1,6 @@
 import { Critical } from './types';
 import { EventEmitter } from 'events';
+import { delay } from './utils';
 
 export const Concurrency = 10;
 
@@ -44,8 +45,8 @@ export class Queue<T> {
                 this._emitter.emit('done', this._results);
         }
 
-        return Promise.resolve(this.fn(config))
-            .then(() => done(), done);
+        return delay(100).then(() => this.fn(config)).then(() => done(), done)
+
     }
 
 }
