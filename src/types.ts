@@ -1,3 +1,5 @@
+import { Writable } from 'stream';
+import { format } from 'util';
 
 export interface Critical {
     inline?: boolean
@@ -36,4 +38,12 @@ export interface FileConfig {
     url: string;
     dest: string;
     delay?: number
+}
+
+export class Logger {
+    constructor(private out: Writable) { }
+
+    log(fmt: string, ...args: any[]) {
+        this.out.write(format(fmt, ...args));
+    }
 }

@@ -1,5 +1,5 @@
 import { Queue, Result } from './queue';
-import { Critical, FileConfig } from './types';
+import { Critical, FileConfig, Logger } from './types';
 import { Browser, Page, launch } from 'puppeteer';
 import mkdirp from 'mkdirp';
 import * as Gen from 'critical';
@@ -31,7 +31,7 @@ export class ChromiumQueue {
     private browser: Browser | undefined;
     private pages: Page[] = [];
 
-    constructor(private tasks: FileConfig[], private concurrency: number = 10) {
+    constructor(private tasks: FileConfig[], private logger: Logger, private concurrency: number = 10) {
         this.queue = new Queue(tasks, this.work.bind(this), this.concurrency);
     }
 
@@ -110,10 +110,11 @@ export class ChromiumQueue {
 
             await ensurepath(dirname);
             await fs.writeFile(dest, `<style>${out}</style>`);
-
+            this.logger.log("critical generated: %s => %s", config.url, config.dest);
 
         } catch (e) {
             this.pages.push(page);
+            this.logger.log("could not generate critical for: %s", config.url);
             throw e;
         }
 

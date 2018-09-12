@@ -2,9 +2,9 @@ import { generate } from '../index'
 import yargs from 'yargs';
 import * as fs from 'mz/fs';
 import * as Path from 'path';
-import { Critical, FileConfig } from '../types';
-import * as util from 'util';
+import { FileConfig, Logger } from '../types';
 import * as os from 'os';
+import { Writable } from 'stream';
 
 export async function run() {
     const argv = yargs
@@ -17,7 +17,7 @@ export async function run() {
         .option('pages', {
             alias: 'p',
             type: 'number',
-            describe: 'Number of concurrently running tabs (defaults to number of cpus)',
+            describe: 'Number of concurrent running tabs (defaults to number of cpus)',
             default: os.cpus().length
         })
         .option('browsers', {
@@ -28,6 +28,13 @@ export async function run() {
         })
         .option('log', {
             alias: 'l',
+            type: "string",
+            describe: "Direct output to file. Can be 'stdout', 'stderr' or path. Defaults to stdout"
+        })
+        .option('report', {
+            alias: 'r',
+            type: 'string',
+            describe: "json file with more details"
         })
         .demandOption(['config'], 'Please provide a Configuration file')
         .help()
@@ -55,18 +62,30 @@ export async function run() {
         throw e;
     }
 
+    let output: Writable = process.stdout;
+    if (argv.log) {
+        if (argv.log == 'stderr')
+            argv.log = process.stderr;
+        else if (argv.log != 'stdout')
+            output = fs.createWriteStream(argv.log);
+    }
+
 
     const result = await generate(config, {
         browsers: argv.browsers,
         concurrency: argv.pages
-    });
+    }, new Logger(output));
 
     let out = result.map(m => {
         if (m.error) m.error = m.error.message as any;
         return m
     })
 
-    await fs.writeFile("critical-log.json", JSON.stringify(out, null, 2));
+    if (argv.report) {
+        await fs.writeFile(argv.report, JSON.stringify(out, null, 2));
+    }
+
+
 
 
 }
