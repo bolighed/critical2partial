@@ -61,7 +61,9 @@ export async function run() {
                 };
             })
             if (input.browser_args)
-                launchOptions = input.browser_args;
+                launchOptions = {
+                    args: input.browser_args
+                };
         }
         config = input;
         if (!Array.isArray(config)) throw new TypeError('invalid input');
