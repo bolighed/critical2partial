@@ -6,6 +6,7 @@ import { FileConfig } from '../types';
 import * as os from 'os';
 import { Writable } from 'stream';
 import { Logger } from '../utils';
+import { LaunchOptions, launch } from 'puppeteer';
 
 export async function run() {
     const argv = yargs
@@ -40,6 +41,14 @@ export async function run() {
         .option('bail', {
             describe: 'Bail on error'
         })
+        .option('chromium-executable', {
+            describe: 'Path to chromium executable',
+            type: 'string'
+        })
+        .option('chromium-args', {
+            describe: 'Path to chromium executable',
+            type: 'array',
+        })
         .demandOption(['config'], 'Please provide a Configuration file')
         .help()
         .argv;
@@ -49,7 +58,7 @@ export async function run() {
 
     // Old config style
     let config: FileConfig[] | undefined;
-    let launchOptions = {}
+    let launchOptions: LaunchOptions = {}
     try {
         let input = require(resolvedPath);
         if (!Array.isArray(input)) {
@@ -69,6 +78,25 @@ export async function run() {
         if (!Array.isArray(config)) throw new TypeError('invalid input');
     } catch (e) {
         throw e;
+    }
+
+
+    if (argv['chromium-executable']) {
+        launchOptions.executablePath = argv['chromium-executable'];
+    }
+
+    if (argv['chromium-args']) {
+
+        let args = argv['chromium-args'].map((m: string) => {
+            if (!m.startsWith('--'))
+                m = '--' + m;
+            return m;
+        })
+
+        if (Array.isArray(launchOptions.args))
+            launchOptions.args.push(...args)
+        else
+            launchOptions.args = args;
     }
 
     let output: Writable = process.stdout;
