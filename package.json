@@ -9,7 +9,6 @@
     "prepare": "./node_modules/.bin/tsc"
   },
   "bin": {
-    "bolighed-critical2partial": "./cli.js",
     "bo-critical": "./bin/bo-critical"
   },
   "repository": {
