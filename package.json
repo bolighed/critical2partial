@@ -2,7 +2,7 @@
   "name": "bolighed-critical2partial",
   "version": "2.1.2",
   "description": "Tool for create critical html partials",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "./node_modules/.bin/tsc",
