@@ -53,4 +53,3 @@ VOLUME /static
 # , "--chromium-args", "disable-dev-shm-usage", "headless", "disable-gpu"
 ENTRYPOINT [ "/usr/local/bin/bo-critical", "--chromium-executable", "/usr/bin/chromium-browser"]
 
-#CMD ["-c /critical.config.js"]
