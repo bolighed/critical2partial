@@ -1,6 +1,6 @@
 {
   "name": "bolighed-critical2partial",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Tool for create critical html partials",
   "main": "./lib/index.js",
   "scripts": {
@@ -31,7 +31,7 @@
     "lodash.flatten": "^4.4.0",
     "mkdirp": "^0.5.1",
     "mz": "^2.7.0",
-    "puppeteer": "^1.1.1",
+    "puppeteer": "1.4.0",
     "strip-ansi": "^4.0.0",
     "yargs": "^11.1.0"
   },
