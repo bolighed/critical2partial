@@ -37,7 +37,8 @@ export async function generate(files: FileConfig[], options: Options, logger: Lo
     const queues = splitArrayIntoChunks(files, options.browsers || 1).map(m => new ChromiumQueue(m, {
         concurrency: options.concurrency,
         launchOptions: options.launchOptions,
-        logger: logger
+        logger: logger,
+        bailOnError: options.bailOnError
     }));
 
     const results = await Promise.all(queues.map(m => m.run()));
