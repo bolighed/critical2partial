@@ -1,6 +1,6 @@
 import { Queue, Result } from './queue';
-import { Critical, FileConfig, Logger } from './types';
-import { Browser, Page, launch } from 'puppeteer';
+import { FileConfig } from './types';
+import { Browser, Page, launch, LaunchOptions } from 'puppeteer';
 import mkdirp from 'mkdirp';
 import * as Gen from 'critical';
 import * as Path from 'path';
@@ -8,7 +8,7 @@ import * as fs from 'mz/fs';
 import Debug from 'debug';
 const debug = Debug('bo-critical:queue');
 import chalk from 'chalk';
-import { delay } from './utils';
+import { delay, Logger } from './utils';
 
 function ensurepath(path: string) {
     return new Promise((res, rej) => {
@@ -20,23 +20,39 @@ function ensurepath(path: string) {
 
 
 
+export interface ChromiumQueueOptions {
+    concurrency?: number;
+    launchOptions?: LaunchOptions
+    logger?: Logger;
+    bailOnError?: boolean;
+}
+
 
 export class ChromiumQueue {
     private queue: Queue<FileConfig>;
     private browser: Browser | undefined;
+    private concurrency: number;
     private pages: Page[] = [];
+    private logger: Logger;
 
-    constructor(private tasks: FileConfig[], private logger: Logger, private concurrency: number = 10) {
-        this.queue = new Queue(tasks, this.work.bind(this), this.concurrency);
+    constructor(private tasks: FileConfig[], private options: ChromiumQueueOptions = {}) {
+        this.concurrency = this.options.concurrency || 10;
+        this.logger = this.options.logger || new Logger();
+        this.queue = new Queue({
+            tasks: tasks,
+            worker: this.work.bind(this),
+            concurrency: this.concurrency,
+            bailOnError: options.bailOnError
+        })
     }
 
     async run() {
 
-        this.browser = await launch({
+        this.browser = await launch(Object.assign({
             headless: true,
             handleSIGINT: true,
             args: void 0
-        });
+        }, this.options.launchOptions || {}));
 
         debug('opening pages %d', this.concurrency);
         const promises: Promise<Page>[] = []
@@ -53,13 +69,10 @@ export class ChromiumQueue {
             result = await this.queue.run();
         } catch (e) {
             await this.browser.close();
-            //process.setMaxListeners(old);
             throw e;
         }
 
         await this.browser.close();
-
-        //process.setMaxListeners(old);
 
         Object.freeze(this);
         Object.freeze(this.tasks)

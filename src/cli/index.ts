@@ -2,9 +2,10 @@ import { generate } from '../index'
 import yargs from 'yargs';
 import * as fs from 'mz/fs';
 import * as Path from 'path';
-import { FileConfig, Logger } from '../types';
+import { FileConfig } from '../types';
 import * as os from 'os';
 import { Writable } from 'stream';
+import { Logger } from '../utils';
 
 export async function run() {
     const argv = yargs
@@ -36,13 +37,19 @@ export async function run() {
             type: 'string',
             describe: "json file with more details"
         })
+        .option('bail', {
+            describe: 'Bail on error'
+        })
         .demandOption(['config'], 'Please provide a Configuration file')
         .help()
         .argv;
 
     const resolvedPath = Path.resolve(argv.config);
 
+
+    // Old config style
     let config: FileConfig[] | undefined;
+    let launchOptions = {}
     try {
         let input = require(resolvedPath);
         if (!Array.isArray(input)) {
@@ -53,6 +60,8 @@ export async function run() {
                     critical: m.critical_options
                 };
             })
+            if (input.browser_args)
+                launchOptions = input.browser_args;
         }
         config = input;
         if (!Array.isArray(config)) throw new TypeError('invalid input');
@@ -71,13 +80,20 @@ export async function run() {
 
     const result = await generate(config, {
         browsers: argv.browsers,
-        concurrency: argv.pages
+        concurrency: argv.pages,
+        bailOnError: !!argv.bail,
+        launchOptions: launchOptions
     }, new Logger(output));
 
     let out = result.map(m => {
         if (m.error) m.error = m.error.message as any;
         return m
     })
+
+
+    if (out.filter(m => m.status == 'fail').length) {
+        process.exitCode = 2;
+    }
 
     if (argv.report) {
         await fs.writeFile(argv.report, JSON.stringify(out, null, 2));
