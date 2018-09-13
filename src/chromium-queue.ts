@@ -48,11 +48,14 @@ export class ChromiumQueue {
 
     async run() {
 
-        this.browser = await launch(Object.assign({
+        let launchOptions = Object.assign({
             headless: true,
             handleSIGINT: true,
             args: void 0
-        }, this.options.launchOptions || {}));
+        }, this.options.launchOptions || {});
+
+        debug("launch browser %j", launchOptions)
+        this.browser = await launch(launchOptions);
 
         debug('opening pages %d', this.concurrency);
         const promises: Promise<Page>[] = []
@@ -86,7 +89,7 @@ export class ChromiumQueue {
     private async work(config: FileConfig) {
         let page = this.pages.pop()!;
 
-        if (!page || page.isClosed()) {
+        if (!page || page.isClosed) {
             page = await this.browser!.newPage();
         }
 
@@ -114,7 +117,15 @@ export class ChromiumQueue {
 
             debug('generating critical %s', config.url)
             const out = await Gen.generate(Object.assign({
-                html
+                html,
+                penthouse: {
+                    unstableKeepBrowserAlive: true,
+                    puppeteer: {
+                        getBrowser: () => {
+                            return this.browser;
+                        }
+                    }
+                }
             }, config.critical));
 
 
