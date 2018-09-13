@@ -1,5 +1,6 @@
 import { ChromiumQueue } from './chromium-queue';
 import { LaunchOptions } from 'puppeteer';
+import { Result } from './queue';
 import { FileConfig } from './types';
 import { Logger } from './utils';
 import flatten from 'lodash.flatten'
@@ -41,7 +42,13 @@ export async function generate(files: FileConfig[], options: Options, logger: Lo
         bailOnError: options.bailOnError
     }));
 
-    const results = await Promise.all(queues.map(m => m.run()));
+    let results: Result<FileConfig>[][] = [];
+
+    try {
+        results = await Promise.all(queues.map(m => m.run()));
+    } catch (e) {
+        queues.forEach(m => m.destroy());
+    }
 
     process.setMaxListeners(old);
 

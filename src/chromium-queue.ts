@@ -69,10 +69,12 @@ export class ChromiumQueue {
             result = await this.queue.run();
         } catch (e) {
             await this.browser.close();
+            this.browser = void 0;
             throw e;
         }
 
         await this.browser.close();
+        this.browser = void 0;
 
         Object.freeze(this);
         Object.freeze(this.tasks)
@@ -138,5 +140,11 @@ export class ChromiumQueue {
 
     }
 
+    async destroy() {
+        if (this.browser) {
+            await this.browser.close();
+            this.browser = void 0;
+        }
+    }
 
 }

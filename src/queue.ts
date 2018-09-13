@@ -60,7 +60,6 @@ export class Queue<T> {
         this._running++;
 
         const done = (error?: Error) => {
-            console.log(error, this.bailOnError)
             if (error && this.bailOnError) {
                 this._emitter.emit('error', error);
                 return;
