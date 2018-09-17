@@ -62,17 +62,18 @@ export async function run() {
     try {
         let input = require(resolvedPath);
         if (!Array.isArray(input)) {
+            if (input.browser_args)
+                launchOptions = {
+                    args: input.browser_args
+                };
+
             input = input.files.map((m: any) => {
                 return {
                     url: m.static_file,
                     dest: m.output_file,
                     critical: m.critical_options
                 };
-            })
-            if (input.browser_args)
-                launchOptions = {
-                    args: input.browser_args
-                };
+            });
         }
         config = input;
         if (!Array.isArray(config)) throw new TypeError('invalid input');
